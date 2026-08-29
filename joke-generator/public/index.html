@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Random Joke Generator</title>
+  <style>
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial; padding: 2rem; max-width: 700px; margin: auto; }
+    button { padding: 0.5rem 1rem; font-size: 1rem; }
+    .joke { margin-top: 1.25rem; }
+    .setup { font-weight: 600; }
+    .punchline { margin-top: 0.75rem; color: #2b6cb0; }
+  </style>
+</head>
+<body>
+  <h1>Random Joke Generator</h1>
+  <p>Press the button to fetch a random joke from an external API (proxied through this server).</p>
+  <button id="getJoke">Get a joke</button>
+  <div class="joke" id="joke"></div>
+
+  <script>
+    const btn = document.getElementById('getJoke');
+    const jokeDiv = document.getElementById('joke');
+
+    async function fetchJoke() {
+      jokeDiv.innerHTML = 'Loading...';
+      try {
+        const res = await fetch('/api/joke');
+        if (!res.ok) throw new Error('Network response was not ok');
+        const data = await res.json();
+        jokeDiv.innerHTML = `\n          <div class="setup">${escapeHtml(data.setup)}</div>\n          <div class="punchline">${escapeHtml(data.punchline)}</div>\n        `;
+      } catch (err) {
+        jokeDiv.innerHTML = `<span style="color:crimson">Failed to load joke: ${escapeHtml(err.message)}</span>`;
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"'`]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;","`":"&#96;"}[s]));
+    }
+
+    btn.addEventListener('click', fetchJoke);
+
+    // Load one on start
+    fetchJoke();
+  </script>
+</body>
+</html>
